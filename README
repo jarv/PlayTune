@@ -1,0 +1,7 @@
+Arduino / AVR library for playing songs using match
+values and delays.  Supports up to three timers simultaneously. 
+
+Includes xml2h.py which can generate a header file
+containing note and delay info from MusicXML.
+
+See http://jarv.org for more info.
