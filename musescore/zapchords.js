@@ -3,7 +3,7 @@
 //  Linux Music Score Editor
 //  $Id:$
 //
-//  Test plugin
+//  Zap Chords plugin
 //
 //  Copyright (C)2009 Werner Schweer and others
 //
