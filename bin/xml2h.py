@@ -3,7 +3,7 @@
 
 from BeautifulSoup import BeautifulStoneSoup
 from collections import defaultdict
-from os.path import splitext
+from os.path import splitext, basename
 import re, sys
 
 if len(sys.argv) < 2:
@@ -302,8 +302,8 @@ while part_select < num_parts:
 
 # create header file
 
-hdefines = "#ifndef " + splitext(fname)[0] + "\n" + \
-        "#define " + splitext(fname)[0] + "\n" + \
+hdefines = "#ifndef " + basename(splitext(fname)[0]) + "\n" + \
+        "#define " + basename(splitext(fname)[0]) + "\n" + \
         "#include <stdint.h>\n" + \
         "#include <avr/pgmspace.h>\n\n"
 
@@ -312,7 +312,7 @@ harrays = ""
 
 for cnt in range(0,len(d)):
     p = d[cnt]
-    scnt = str(cnt+1)
+    scnt = str(cnt)
     hdefines += "#define PART"+scnt+" "+str(p['prescale'])+",p"+scnt+\
             "_notes,p"+scnt+"_delays,sizeof(p"+scnt+"_notes)/sizeof(*(p"+ \
             scnt + "_notes)),sizeof(p"+scnt+"_delays)/sizeof(*(p"+scnt+ \

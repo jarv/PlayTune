@@ -25,16 +25,17 @@
 class PlayTune
 {
     public:
-        PlayTune( uint8_t timer, uint16_t prescale, 
+        PlayTune( uint8_t timer, uint16_t prescale=0, 
                 const uint8_t *notes=0, const uint8_t *delays=0,
                 uint16_t notes_len=0, uint16_t delays_len=0); 
         uint8_t playNote(void);
         uint8_t turnOff(void);
         uint8_t turnOn(void);
         static uint16_t pause;
+        uint8_t isPlaying(void);
 
     private:
-        uint8_t isFinished;
+        uint8_t isFinished_;
         const uint8_t *notes_;
         uint16_t notes_len_;
         const uint8_t *delays_;
@@ -44,6 +45,9 @@ class PlayTune
         uint8_t timeleft_;
         uint16_t pos_;
         uint8_t last_note_;
+        static const uint8_t def_notes_[];
+        static const uint8_t def_delays_[]; 
+
 
 };
 

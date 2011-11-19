@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 #include "playtune.h"
 
 #define output_low(port,pin) port &= ~(1<<pin)
@@ -33,7 +34,9 @@
         values are 1,8,64,256 or 1024.
 */
 
-uint16_t PlayTune::pause = 60000;
+uint16_t PlayTune::pause = 10;
+const uint8_t PlayTune::def_notes_[] PROGMEM = {118,105,94,88,79,70,62,59};
+const uint8_t PlayTune::def_delays_[] PROGMEM = {1,1,1,1,1,1,1};
 
 PlayTune::PlayTune( uint8_t timer, uint16_t prescale, 
         const uint8_t *notes, const uint8_t *delays,
@@ -42,18 +45,25 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
 
 
     timer_ = timer;
-    prescale_ = prescale;
+
+    if (prescale == 0) {
+        prescale_ = PS_256;
+        notes_ = PlayTune::def_notes_;
+        delays_ = PlayTune::def_delays_;
+        notes_len_ = 8;
+        delays_len_ = 8;
+    } else {
+        prescale_ = prescale;
+        notes_ = notes;
+        notes_len_ = notes_len;
+        delays_ = delays;
+        delays_len_ = delays_len;
+    }
 
     timeleft_ = 0;
     pos_ = 0;
 
-    notes_ = notes;
-    notes_len_ = notes_len;
-    delays_ = delays;
-    delays_len_ = delays_len;
-
-    isFinished = false;
-
+    isFinished_ = false;
     // initialize the timer for
     // CTC mode and set corresponding pin for ouput
 
@@ -131,13 +141,14 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
 uint8_t
 PlayTune::playNote(void)
 {
-    if (isFinished == true) {
+    if (isFinished_ == true) {
         return(0);
     } else if (pos_ >= notes_len_) {
         // reached the end of the song, reset
-        // position, mark as finished
+        // position, turn off timer mark as finished
+        turnOff();
         pos_ = 0;
-        isFinished = true;
+        isFinished_ = true;
     } else if (timeleft_ == 0) {
         // play a new note or a rest
         timeleft_ = pgm_read_byte(&delays_[pos_]);
@@ -147,9 +158,7 @@ PlayTune::playNote(void)
                 // playing the same note, going to introduce
                 // a small pause between the notes
                 turnOff();
-                for (uint16_t cnt=0; cnt < PlayTune::pause; cnt++) {
-                    __asm("NOP");
-                }
+                _delay_ms(PlayTune::pause);
             }
             turnOn();
             switch(timer_) {
@@ -322,6 +331,16 @@ PlayTune::turnOn()
         return(1);
     }
     return(0);
+}
+
+uint8_t 
+PlayTune::isPlaying(void)
+{
+    if (isFinished_) {
+        return(0);
+    } else {
+        return (1);
+    }
 }
 
 #if defined(ATMEGA)
