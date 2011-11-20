@@ -1,7 +1,17 @@
 Arduino / AVR library for playing songs using match
 values and delays.  Supports up to three timers simultaneously. 
 
-Includes xml2h.py which can generate a header file
-containing note and delay info from MusicXML.
+playtune.cpp / playtune.h
+ - Arduino Library for generating music
 
-See http://jarv.org for more info.
+songs/
+ - Header files for pre-generated songs
+
+bin/xml2h.py
+ - Converts a MusicXML file into a header file
+   for the Arduino lib
+
+musescore/zapchords.js
+ - plugin for musescore that removes chords
+
+See http://jarv.org for more info

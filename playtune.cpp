@@ -1,3 +1,23 @@
+/* 
+ * Copyright (c) 2011 John Jarvis
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+*/
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
@@ -35,8 +55,6 @@
 */
 
 uint16_t PlayTune::pause = 10;
-const uint8_t PlayTune::def_notes_[] PROGMEM = {118,105,94,88,79,70,62,59};
-const uint8_t PlayTune::def_delays_[] PROGMEM = {1,1,1,1,1,1,1};
 
 PlayTune::PlayTune( uint8_t timer, uint16_t prescale, 
         const uint8_t *notes, const uint8_t *delays,
@@ -46,19 +64,11 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
 
     timer_ = timer;
 
-    if (prescale == 0) {
-        prescale_ = PS_256;
-        notes_ = PlayTune::def_notes_;
-        delays_ = PlayTune::def_delays_;
-        notes_len_ = 8;
-        delays_len_ = 8;
-    } else {
-        prescale_ = prescale;
-        notes_ = notes;
-        notes_len_ = notes_len;
-        delays_ = delays;
-        delays_len_ = delays_len;
-    }
+    prescale_ = prescale;
+    notes_ = notes;
+    notes_len_ = notes_len;
+    delays_ = delays;
+    delays_len_ = delays_len;
 
     timeleft_ = 0;
     pos_ = 0;
@@ -90,7 +100,6 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
         
         case TIMER1:
 #if defined(ATMEGA)
-
             TIMSK1 |= (1<<OCIE1B);  // timer1 compare B match interrupt enabled
             sei();
             
@@ -102,7 +111,6 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
                                    //compare match
             DDRB |= (1<<PB1);     // set PB1 for output
             OCR1B = 255;
-
 #elif defined(ATTINY)
             TCCR1 = 0;
             TCCR1 |= (1<<CS13) | (1<<CS10); // clk/256
@@ -158,7 +166,17 @@ PlayTune::playNote(void)
                 // playing the same note, going to introduce
                 // a small pause between the notes
                 turnOff();
+#if defined(ATMEGA)
                 _delay_ms(PlayTune::pause);
+#elif defined(ATTINY)
+                // :(
+                uint16_t cnt = 60000;
+                while (cnt--) {
+                    __asm("NOP");
+                }
+#else
+    #error No target for note pause
+#endif
             }
             turnOn();
             switch(timer_) {
@@ -232,6 +250,7 @@ PlayTune::turnOff()
         }
     return(1);
 }
+
 
 uint8_t
 PlayTune::turnOn()
@@ -342,14 +361,12 @@ PlayTune::isPlaying(void)
         return (1);
     }
 }
-
 #if defined(ATMEGA)
 ISR(TIMER1_COMPB_vect)
 {
     TCNT1=0;
 }
 #endif
-
 
     // -- TIMER0
     //set_output(DDRD, PD6); 
