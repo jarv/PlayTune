@@ -14,4 +14,13 @@ bin/xml2h.py
 musescore/zapchords.js
  - plugin for musescore that removes chords
 
+atmega168.cpp
+ - example code for the atmega168
+
+attiny85.cpp
+ - example code for the attiny85
+
+Makefile
+ - Modify to either build for the atmega168 or attiny85
+
 See http://jarv.org for more info
