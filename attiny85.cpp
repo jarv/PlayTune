@@ -4,7 +4,7 @@
 #include <avr/sleep.h>
 #include <util/delay.h>
 #include "playtune.h"
-#include "songs/canyoufeel.h"
+#include "songs/gotafriend.h"
 int main(void) 
 {
     // set everything low that we aren't using
@@ -16,7 +16,7 @@ int main(void)
     
         p0.playNote(); 
         p1.playNote(); 
-        _delay_ms(50);
+        _delay_ms(60);
     } 
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_mode(); 
