@@ -2,7 +2,7 @@
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
-#include "songs/gotafriend.h"
+#include "songs/canyoufeel.h"
 #include "playtune.h"
 
 #define output_low(port,pin) port &= ~(1<<pin)
@@ -21,17 +21,13 @@
 
 int main(void) {
 
-    set_output(DDRB, LED);
-    output_low(PORTB, LED);
-    PlayTune p0(0);
-    PlayTune p1(1);
+    PlayTune p0(0,PART0);
+    PlayTune p1(1,PART1);
               
     while ( p0.isPlaying() || p1.isPlaying() ) {
         p0.playNote();
         p1.playNote();
-        _delay_ms(500); 
-        //set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        //sleep_mode();
+        _delay_ms(30); 
     }
     return(0);
 }

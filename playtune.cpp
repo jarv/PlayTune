@@ -151,13 +151,15 @@ PlayTune::playNote(void)
 {
     if (isFinished_ == true) {
         return(0);
-    } else if (pos_ >= notes_len_) {
-        // reached the end of the song, reset
-        // position, turn off timer mark as finished
-        turnOff();
-        pos_ = 0;
-        isFinished_ = true;
     } else if (timeleft_ == 0) {
+        // check to see if the song is
+        // over, if it is return.
+        if (pos_ >= notes_len_) {
+            turnOff();
+            pos_ = 0;
+            isFinished_ = true;
+            return(1);
+        }
         // play a new note or a rest
         timeleft_ = pgm_read_byte(&delays_[pos_]);
         uint8_t cur_note = pgm_read_byte(&notes_[pos_]);
