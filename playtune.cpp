@@ -38,10 +38,13 @@
 
 
 #if defined( __AVR_ATmega328P__ ) | \
-    defined( __AVR_ATmega168__ )
+    defined( __AVR_ATmega168__ ) 
 # define ATMEGA
 #endif 
 
+#if defined( __AVR_AT90USB1287__)
+#define AT90USB
+#endif
 
 /* PlayTune::PlayTune
    A tick represents one call to PlayNote, the amount of time
@@ -79,13 +82,20 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
 
     switch(timer_) {
         case TIMER0:
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
+    #if defined(ATMEGA)
+            DDRD |= (1<<PD6);     // set PD6 for ouput
+    #elif defined(AT90USB)
+            DDRB |= (1<<PB7);   // set PB7 for output
+    #else
+        #error No target for timer0 output pin
+    #endif
+
             TCCR0A = 0;
             TCCR0B = 0;
             TCCR0A |= (1<<WGM01);  // configure timer 1 for CTC mode
             TCCR0A |= (1<<COM0A0); // toggle OC0A (PD6/arduino 6) on 
                                    // compare match
-            DDRD |= (1<<PD6);     // set PD6 for ouput
 #elif defined(ATTINY)
             TCCR0A = 0;
             TCCR0B = 0;
@@ -99,7 +109,7 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             break;
         
         case TIMER1:
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
             TIMSK1 |= (1<<OCIE1B);  // timer1 compare B match interrupt enabled
             sei();
             
@@ -109,7 +119,13 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR1B |= (1<<WGM12);  // configure timer 2 for CTC mode
             TCCR1A |= (1<<COM1A0); // toggle OC1A (PB1/arduino 9) on 
                                    //compare match
+    #if defined(ATMEGA)
             DDRB |= (1<<PB1);     // set PB1 for output
+    #elif defined(AT90USB)
+            DDRB |= (1<<PB5);   // set PB5 for output
+    #else
+        #error No target for timer1 output pin
+    #endif
             OCR1B = 255;
 #elif defined(ATTINY)
             TCCR1 = 0;
@@ -121,7 +137,7 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
     #error No target for timer1 setup
 #endif
             break;
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
         case TIMER2:
     
             TCCR2A = 0;
@@ -130,7 +146,13 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR2A |= (1<<WGM21); // configure timer 3 for CTC mode
             TCCR2A |= (1<<COM2A0); // toggle OC2A (PB3/arduino 11) 
                                    // on compare match
+    #if defined(AT90USB)
             DDRB |= (1<<PB3);     // set PB3 for output
+    #elif defined(AT90USB)
+            DDRB |= (1<<PB4);
+    #else
+        #error No target for timer2 output pin
+    #endif
             break;
 #endif
     };
@@ -168,7 +190,7 @@ PlayTune::playNote(void)
                 // playing the same note, going to introduce
                 // a small pause between the notes
                 turnOff();
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
                 _delay_ms(PlayTune::pause);
 #elif defined(ATTINY)
                 // :(
@@ -183,15 +205,10 @@ PlayTune::playNote(void)
             turnOn();
             switch(timer_) {
                 case TIMER0:
-#if defined(ATMEGA) | defined(ATTINY)
                     OCR0A=cur_note;
-#else
-    #error No target for timer0 setup
-#endif
-
                     break;
                 case TIMER1:
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
                     OCR1A=cur_note;
 #elif defined(ATTINY)
                     OCR1C=cur_note;
@@ -199,7 +216,7 @@ PlayTune::playNote(void)
     #error No target for timer1 setup
 #endif
                     break;
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
 
                 case TIMER2:
                     OCR2A=cur_note;
@@ -227,14 +244,10 @@ PlayTune::turnOff()
 {
     switch(timer_) {
         case TIMER0:
-#if defined(ATMEGA) | defined(ATTINY)
             TCCR0B &= ~(1<<CS02) & ~(1<<CS01) & ~(1<<CS00);
-#else
-    #error No target for timer0 setup
-#endif
             break;
         case TIMER1:
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
             TCCR1B &= ~(1<<CS12) & ~(1<<CS11) & ~(1<<CS10); 
 #elif defined(ATTINY)
             TCCR1 &= ~(1<<CS10) & ~(1<<CS11) & ~(1<<CS12) & ~(1<<CS13);
@@ -242,7 +255,7 @@ PlayTune::turnOff()
     #error No target for timer1 setup
 #endif
             break;
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
         case TIMER2:
             TCCR2B &= ~(1<<CS22) & ~(1<<CS21) & ~(1<<CS20);
             break;
@@ -260,7 +273,7 @@ PlayTune::turnOn()
     switch(timer_) {
         case TIMER0:
             switch(prescale_) {
-#if defined(ATMEGA) | defined(ATTINY)
+#if defined(ATMEGA) || defined(ATTINY) || defined(AT90USB)
                 case PS_1:
                     TCCR0B |= (1<<CS00);
                     break;
@@ -285,7 +298,7 @@ PlayTune::turnOn()
             break;
         case TIMER1:
             switch(prescale_) {
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
                 case PS_1:
                     TCCR1B |= (1<<CS10);
                     break;
@@ -305,14 +318,32 @@ PlayTune::turnOn()
                 case PS_1:
                     TCCR1 |= (1<<CS10);
                     break;
+                case PS_2:
+                    TCCR1 |= (1<<CS11);
+                    break;
+                case PS_4:
+                    TCCR1 |= (1<<CS10) | (1<<CS11);
+                    break;
                 case PS_8:
                     TCCR1 |= (1<<CS12);
+                    break;
+                case PS_16:
+                    TCCR1 |= (1<<CS12);
+                    break;
+                case PS_32:
+                    TCCR1 |= (1<<CS12) | (1<<CS11);
                     break;
                 case PS_64:
                     TCCR1 |= (1<<CS12) | (1<<CS11) | (1<<CS10);
                     break;
+                case PS_128:
+                    TCCR1 |= (1<<CS13);
+                    break;
                 case PS_256:
                     TCCR1 |= (1<<CS13) | (1<<CS10);
+                    break;
+                case PS_512:
+                    TCCR1 |= (1<<CS13) | (1<<CS11);
                     break;
                 case PS_1024:
                     TCCR1 |= (1<<CS13) | (1<CS11) | (1<<CS10);
@@ -324,7 +355,7 @@ PlayTune::turnOn()
                     return(0);
             }
             break;
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
         case TIMER2:
             switch(prescale_) {
                 case PS_1:
@@ -363,7 +394,7 @@ PlayTune::isPlaying(void)
         return (1);
     }
 }
-#if defined(ATMEGA)
+#if defined(ATMEGA) || defined(AT90USB)
 ISR(TIMER1_COMPB_vect)
 {
     TCNT1=0;

@@ -16,7 +16,7 @@ int main(void)
     
         p0.playNote(); 
         p1.playNote(); 
-        _delay_ms(60);
+        _delay_ms(80);
     } 
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
     sleep_mode(); 

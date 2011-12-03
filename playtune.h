@@ -39,9 +39,15 @@
 #define TIMER2 2
 
 #define PS_1024 1024
+#define PS_512 512
 #define PS_256 256
+#define PS_128 128
 #define PS_64 64
+#define PS_32 32
+#define PS_16 16
 #define PS_8 8
+#define PS_4 4
+#define PS_2 2
 #define PS_1 1
 
 static const uint8_t def_notes_[] PROGMEM = {118,105,94,88,79,70,62,59};
