@@ -305,9 +305,11 @@ while part_select < num_parts:
     part_select += 1
 
 # create header file
+name = basename(splitext(fname)[0])
+name = re.sub(re.compile("[-]"),"_",name)
 
-hdefines = "#ifndef " + basename(splitext(fname)[0]) + "\n" + \
-        "#define " + basename(splitext(fname)[0]) + "\n" + \
+hdefines = "#ifndef " + name.upper() + "\n" + \
+        "#define " + name.upper() + "\n" + \
         "#include <stdint.h>\n" + \
         "#include <avr/pgmspace.h>\n\n"
 
@@ -317,9 +319,11 @@ harrays = ""
 for cnt in range(0,len(d)):
     p = d[cnt]
     scnt = str(cnt)
-    hdefines += "#define PART"+scnt+" "+str(p['prescale'])+",p"+scnt+\
-            "_notes,p"+scnt+"_delays,sizeof(p"+scnt+"_notes)/sizeof(*(p"+ \
-            scnt + "_notes)),sizeof(p"+scnt+"_delays)/sizeof(*(p"+scnt+ \
+    hdefines += "#define "+ name.upper() + scnt+" "+str(p['prescale'])+","+\
+            name + scnt+ "_notes,"+ name + scnt+\
+            "_delays,sizeof("+ name + scnt+"_notes)/sizeof(*("+ name + \
+            scnt + "_notes)),sizeof("+ name + scnt+\
+            "_delays)/sizeof(*("+ name + scnt+ \
             "_delays))\n"
 
     hcomments += "\n    Part: " + scnt + \
@@ -330,10 +334,10 @@ for cnt in range(0,len(d)):
              "\n"
 
 
-    harrays += "const uint8_t p"+scnt+"_notes[] PROGMEM = {\n" + \
+    harrays += "const uint8_t "+ name + scnt+"_notes[] PROGMEM = {\n" + \
             ",".join( [str(x) for x in p['notes']]) + \
             "\n};\n"
-    harrays += "const uint8_t p"+scnt+"_delays[] PROGMEM = {\n" + \
+    harrays += "const uint8_t "+ name + scnt+"_delays[] PROGMEM = {\n" + \
             ",".join( [str(x) for x in p['delays']]) + \
             "\n};\n\n"
 

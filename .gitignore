@@ -1,0 +1,6 @@
+*.swp
+*.hex
+*.lst
+*.o
+*.out
+*.out.map

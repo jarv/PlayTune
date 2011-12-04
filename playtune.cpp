@@ -146,7 +146,7 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR2A |= (1<<WGM21); // configure timer 3 for CTC mode
             TCCR2A |= (1<<COM2A0); // toggle OC2A (PB3/arduino 11) 
                                    // on compare match
-    #if defined(AT90USB)
+    #if defined(ATMEGA)
             DDRB |= (1<<PB3);     // set PB3 for output
     #elif defined(AT90USB)
             DDRB |= (1<<PB4);
@@ -194,7 +194,7 @@ PlayTune::playNote(void)
                 _delay_ms(PlayTune::pause);
 #elif defined(ATTINY)
                 // :(
-                uint16_t cnt = 60000;
+                uint16_t cnt = 20000;
                 while (cnt--) {
                     __asm("NOP");
                 }
