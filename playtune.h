@@ -63,9 +63,9 @@ class PlayTune
         uint8_t playNote(void);
         uint8_t turnOff(void);
         uint8_t turnOn(void);
-        static uint16_t pause;
         uint8_t isFinished_;
         uint8_t isPlaying(void);
+        static uint16_t pause;
 
     private:
         const uint8_t *notes_;
@@ -80,5 +80,6 @@ class PlayTune
 
 
 };
+
 
 #endif

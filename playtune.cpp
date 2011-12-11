@@ -84,9 +84,9 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
         case TIMER0:
 #if defined(ATMEGA) || defined(AT90USB)
     #if defined(ATMEGA)
-            DDRD |= (1<<PD6);     // set PD6 for ouput
+            DDRD |= (1<<PORTD6);     // set PORTD6 for ouput
     #elif defined(AT90USB)
-            DDRB |= (1<<PB7);   // set PB7 for output
+            DDRB |= (1<<PORTB7);   // set PORTB7 for output
     #else
         #error No target for timer0 output pin
     #endif
@@ -94,15 +94,15 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR0A = 0;
             TCCR0B = 0;
             TCCR0A |= (1<<WGM01);  // configure timer 1 for CTC mode
-            TCCR0A |= (1<<COM0A0); // toggle OC0A (PD6/arduino 6) on 
+            TCCR0A |= (1<<COM0A0); // toggle OC0A (PORTD6/arduino 6) on 
                                    // compare match
 #elif defined(ATTINY)
             TCCR0A = 0;
             TCCR0B = 0;
             TCCR0A |= (1<<WGM01);  // configure timer 1 for CTC mode
-            TCCR0A |= (1<<COM0A0); // toggle OC0A (PD6/arduino 6) on 
+            TCCR0A |= (1<<COM0A0); // toggle OC0A (PORTD6/arduino 6) on 
                                    // compare match
-            DDRB |= (1<<PB0); 
+            DDRB |= (1<<PORTB0); 
 #else
     #error No target for timer0 setup
 #endif
@@ -117,12 +117,12 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR1A = 0;
 
             TCCR1B |= (1<<WGM12);  // configure timer 2 for CTC mode
-            TCCR1A |= (1<<COM1A0); // toggle OC1A (PB1/arduino 9) on 
+            TCCR1A |= (1<<COM1A0); // toggle OC1A (PORTB1/arduino 9) on 
                                    //compare match
     #if defined(ATMEGA)
-            DDRB |= (1<<PB1);     // set PB1 for output
+            DDRB |= (1<<PORTB1);     // set PORTB1 for output
     #elif defined(AT90USB)
-            DDRB |= (1<<PB5);   // set PB5 for output
+            DDRB |= (1<<PORTB5);   // set PORTB5 for output
     #else
         #error No target for timer1 output pin
     #endif
@@ -132,7 +132,7 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR1 |= (1<<CS13) | (1<<CS10); // clk/256
             TCCR1 |= (1<<CTC1); // configure for CTC mode
             TCCR1 |= (1<<COM1A0); // toggle OC1A on compare match
-            DDRB |= (1<<PB1);
+            DDRB |= (1<<PORTB1);
 #else
     #error No target for timer1 setup
 #endif
@@ -144,12 +144,12 @@ PlayTune::PlayTune( uint8_t timer, uint16_t prescale,
             TCCR2B = 0;
 
             TCCR2A |= (1<<WGM21); // configure timer 3 for CTC mode
-            TCCR2A |= (1<<COM2A0); // toggle OC2A (PB3/arduino 11) 
+            TCCR2A |= (1<<COM2A0); // toggle OC2A (PORTB3/arduino 11) 
                                    // on compare match
     #if defined(ATMEGA)
-            DDRB |= (1<<PB3);     // set PB3 for output
+            DDRB |= (1<<PORTB3);     // set PORTB3 for output
     #elif defined(AT90USB)
-            DDRB |= (1<<PB4);
+            DDRB |= (1<<PORTB4);
     #else
         #error No target for timer2 output pin
     #endif
@@ -190,17 +190,9 @@ PlayTune::playNote(void)
                 // playing the same note, going to introduce
                 // a small pause between the notes
                 turnOff();
-#if defined(ATMEGA) || defined(AT90USB)
-                _delay_ms(PlayTune::pause);
-#elif defined(ATTINY)
-                // :(
-                uint16_t cnt = 20000;
-                while (cnt--) {
-                    __asm("NOP");
+                for (uint16_t i=0; i<PlayTune::pause; i++) {
+                    _delay_ms(1);
                 }
-#else
-    #error No target for note pause
-#endif
             }
             turnOn();
             switch(timer_) {
@@ -402,22 +394,22 @@ ISR(TIMER1_COMPB_vect)
 #endif
 
     // -- TIMER0
-    //set_output(DDRD, PD6); 
+    //set_output(DDRD, PORTD6); 
     //TCCR0A |= (1<<WGM01);  // configure timer 1 for CTC mode
-    //TCCR0A |= (1<<COM0A0); // toggle OC0A (PD6/arduino 6) on compare match
+    //TCCR0A |= (1<<COM0A0); // toggle OC0A (PORTD6/arduino 6) on compare match
     //TCCR0B |= (1<<CS02);   // clk/256 prescale
     //OCR0A = 100;
 
     // -- TIMER1
-    //set_output(DDRB, PB1);
+    //set_output(DDRB, PORTB1);
     //TCCR1B |= (1<<WGM12); // CTC 
-    //TCCR1A |= (1<<COM1A0); // toggle OC1A (PB1/arduino 9) on compare match
+    //TCCR1A |= (1<<COM1A0); // toggle OC1A (PORTB1/arduino 9) on compare match
     //TCCR1B |= (1<<CS12); // /256 prescale
     //OCR1A = 100;
 
     // -- TIMER2
-    //set_output(DDRB, PB3);
-    //TCCR2A |= (1<<COM2A0); // toggle OC2A (PB3/arduino 11) on compare match
+    //set_output(DDRB, PORTB3);
+    //TCCR2A |= (1<<COM2A0); // toggle OC2A (PORTB3/arduino 11) on compare match
     //TCCR2A |= (1<<WGM21); // CTC
     //TCCR2B |= (1<<CS22) | (1<<CS21); // clk/256 prescale
     //OCR2A = 100;

@@ -9,17 +9,26 @@
 #include "songs/mspacman-game-start-attiny.h"
 #include "songs/mspacman-actii-the-chase-attiny.h"
 
-
+#define output_low(port,pin) port &= ~(1<<pin)
+#define output_high(port,pin) port |= (1<<pin)
+#define output_toggle(port,pin) port ^= (1<<pin)
+#define set_input(portdir,pin) portdir &= ~(1<<pin)
+#define set_output(portdir,pin) portdir |= (1<<pin)
+#define read_value(portdir,pin) ( portdir & (1<<pin) )
+#define LED PB3
 int main(void) 
 {
+    set_output(DDRB, LED);
+    output_low(PORTB, LED);
     // setup interrupt
     GIMSK |= (1<<INT0); // INT0 enabled for interrupts
-    //MCUCR |= (1<<ISC00); // any logic change on INT0
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();
     sei();
-
+    
     while(1) {
-        set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-        sleep_mode(); 
+        output_low(PORTB, LED); 
+        sleep_cpu();
     }
     return(0);
 }
@@ -27,6 +36,7 @@ int main(void)
 volatile uint8_t tune = 0;
 ISR (INT0_vect)
 {
+    output_high(PORTB, LED);
     PlayTune theymeet0(0,MSPACMAN_ACTI_THEY_MEET0);
     PlayTune theymeet1(1,MSPACMAN_ACTI_THEY_MEET1);
     PlayTune gamestart0(0,MSPACMAN_GAME_START0);
@@ -54,13 +64,24 @@ ISR (INT0_vect)
             break; 
 
         case 3:
+            while ( gamestart0.isPlaying() || gamestart1.isPlaying() ) {
+            
+                gamestart0.playNote(); 
+                gamestart1.playNote(); 
+                _delay_ms(15);
+            } 
+            break; 
+
+
+
+/*
             while ( thechase0.isPlaying() || thechase1.isPlaying() ) {
             
                 thechase0.playNote(); 
                 thechase1.playNote(); 
                 _delay_ms(65);
             } 
-            break;
+            break; */
     } 
 
     if (tune == 3) {
