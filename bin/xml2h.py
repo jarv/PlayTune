@@ -253,7 +253,7 @@ def process_part(p, fq):
     for i in sorted(prescale.keys()):
         print "  %2s) %6s" % (i, str(prescale[i]))
 
-
+    print "!! IMPORTANT !! Prescaler values of 2,4,16,32,128,512 are ONLY valid for the attiny85 TIMER1"
     ps = prescale[ raw_input_def("Pick prescale", str(min(prescale.keys())))]
     t_data = [int(round((fq - (2*ps*i))/(2*ps*i),0)) if i else 0 for i in data]
 
