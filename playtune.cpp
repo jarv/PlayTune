@@ -190,6 +190,7 @@ PlayTune::playNote(void)
                 // playing the same note, going to introduce
                 // a small pause between the notes
                 turnOff();
+                //_delay_ms(PlayTune::pause);
                 for (uint16_t i=0; i<PlayTune::pause; i++) {
                     _delay_ms(1);
                 }

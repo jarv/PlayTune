@@ -5,9 +5,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include "playtune.h"
-#include "songs/mspacman-acti-they-meet-attiny.h"
-#include "songs/mspacman-game-start-attiny.h"
-#include "songs/mspacman-actii-the-chase-attiny.h"
+#include "songs/canyoufeel.h"
 
 #define output_low(port,pin) port &= ~(1<<pin)
 #define output_high(port,pin) port |= (1<<pin)
@@ -18,75 +16,19 @@
 #define LED PB3
 int main(void) 
 {
-    set_output(DDRB, LED);
-    output_low(PORTB, LED);
-    // setup interrupt
-    GIMSK |= (1<<INT0); // INT0 enabled for interrupts
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-    sleep_enable();
-    sei();
-    
-    while(1) {
-        output_low(PORTB, LED); 
-        sleep_cpu();
+    // set everything low that we aren't using
+    DDRB |= (1<<PB2) | (1<<PB4) | (1<<PB3) | (1<<PB5);
+    PORTB &= ~(1<<PB2) | ~(1<<PB4) | ~(1<<PB3) | ~(1<<PB5);
+    PlayTune p0(0,CANYOUFEEL0);
+    PlayTune p1(1,CANYOUFEEL1);
+    while ( p0.isPlaying() || p1.isPlaying() ) {
+        p0.playNote();
+        p1.playNote();
+        _delay_ms(40);
     }
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_mode();
     return(0);
-}
 
-volatile uint8_t tune = 0;
-ISR (INT0_vect)
-{
-    output_high(PORTB, LED);
-    PlayTune theymeet0(0,MSPACMAN_ACTI_THEY_MEET0);
-    PlayTune theymeet1(1,MSPACMAN_ACTI_THEY_MEET1);
-    PlayTune gamestart0(0,MSPACMAN_GAME_START0);
-    PlayTune gamestart1(1,MSPACMAN_GAME_START1);
-    PlayTune thechase0(0,MSPACMAN_ACTII_THE_CHASE0);
-    PlayTune thechase1(1,MSPACMAN_ACTII_THE_CHASE1);
     
-    switch(tune) {
-
-        case 1:
-            while ( theymeet0.isPlaying() || theymeet1.isPlaying() ) {
-            
-                theymeet0.playNote(); 
-                theymeet1.playNote(); 
-                _delay_ms(65);
-            } 
-            break;
-        case 2:
-            while ( gamestart0.isPlaying() || gamestart1.isPlaying() ) {
-            
-                gamestart0.playNote(); 
-                gamestart1.playNote(); 
-                _delay_ms(15);
-            } 
-            break; 
-
-        case 3:
-            while ( gamestart0.isPlaying() || gamestart1.isPlaying() ) {
-            
-                gamestart0.playNote(); 
-                gamestart1.playNote(); 
-                _delay_ms(15);
-            } 
-            break; 
-
-
-
-/*
-            while ( thechase0.isPlaying() || thechase1.isPlaying() ) {
-            
-                thechase0.playNote(); 
-                thechase1.playNote(); 
-                _delay_ms(65);
-            } 
-            break; */
-    } 
-
-    if (tune == 3) {
-        tune = 1;
-    } else {
-        tune++;
-    } 
 }
